@@ -2,6 +2,23 @@ import axios from 'axios';
 
 const COMMONS_API = 'https://commons.wikimedia.org/w/api.php';
 
+interface WikimediaImageInfo {
+  thumburl?: string;
+  descriptionurl?: string;
+  url?: string;
+}
+
+interface WikimediaPage {
+  missing?: string;
+  imageinfo?: WikimediaImageInfo[];
+}
+
+interface WikimediaApiResponse {
+  query?: {
+    pages?: Record<string, WikimediaPage>;
+  };
+}
+
 export interface WikimediaPhoto {
   thumbUrl: string;
   descriptionUrl: string;
@@ -37,12 +54,12 @@ export const fetchWikimediaPhoto = async (
   if (!filename) return null;
 
   try {
-    const response = await axios.get<any>(COMMONS_API, {
+    const response = await axios.get<WikimediaApiResponse>(COMMONS_API, {
       params: {
         action: 'query',
         titles: filename,
         prop: 'imageinfo',
-        iiprop: 'url|extmetadata',
+        iiprop: 'url',
         iiurlwidth: '400',
         format: 'json',
         origin: '*',
@@ -51,17 +68,16 @@ export const fetchWikimediaPhoto = async (
     });
 
     const pages = response.data?.query?.pages ?? {};
-    const page = Object.values(pages)[0] as any;
+    const page = Object.values(pages)[0];
     if (!page || page.missing !== undefined) return null;
 
-    const info = page?.imageinfo?.[0];
+    const info = page.imageinfo?.[0];
     if (!info?.thumburl) return null;
 
     return {
       thumbUrl: info.thumburl,
       descriptionUrl:
-        info.descriptionurl ??
-        `https://commons.wikimedia.org/wiki/${encodeURIComponent(filename)}`,
+        info.descriptionurl ?? `https://commons.wikimedia.org/wiki/${encodeURIComponent(filename)}`,
     };
   } catch (error) {
     if (axios.isCancel(error)) {

@@ -18,9 +18,11 @@ export const AedPhoto = ({ wikimediaCommons, image }: AedPhotoProps) => {
     const controller = new AbortController();
     setLoading(true);
 
-    fetchWikimediaPhoto(wikimediaCommons, image, controller.signal).then((result) => {
-      setPhoto(result);
-      setLoading(false);
+    fetchWikimediaPhoto(wikimediaCommons, image, controller.signal).then(result => {
+      if (!controller.signal.aborted) {
+        setPhoto(result);
+        setLoading(false);
+      }
     });
 
     return () => controller.abort();

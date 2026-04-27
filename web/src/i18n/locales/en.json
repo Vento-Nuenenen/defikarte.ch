@@ -112,6 +112,6 @@
   "notFound": "The page was not found.",
   "goHome": "Go to homepage",
   "node": "Node",
-  "photoLoading": "Loading photo",
+  "photoLoading": "Loading photo...",
   "photoAlt": "Photo of the defibrillator"
 }
